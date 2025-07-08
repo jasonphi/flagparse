@@ -360,7 +360,7 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind 
 	fn := w.obj
 	var fact funcHasFlag
 	// Retrieve existing kind and compare it with new kind
-	if pass.ImportObjectFact(fn, &fact) && fact.Kind == kind {
+	if pass.ImportObjectFact(fn, &fact) && (fact.Kind|kind == fact.Kind) {
 		return
 	}
 
