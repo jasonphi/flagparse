@@ -3,7 +3,7 @@
 package foo
 
 import (
-	"flag" // want flag:"pkgHasFlag\\(mayCreateFlag|mayParseFlag\\)"
+	"flag" // want flag:"pkgHasFlag\\(mayCreateFlag\\|mayParseFlag\\)"
 	"fmt"
 )
 

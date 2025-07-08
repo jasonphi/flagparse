@@ -2,7 +2,7 @@
 
 package storage
 
-import "flag" // want flag:"pkgHasFlag\\(mayCreateFlag|mayParseFlag\\)"
+import "flag" // want flag:"pkgHasFlag\\(mayCreateFlag\\|mayParseFlag\\)"
 
 var FlagStorage string // want FlagStorage:"isFlag"
 

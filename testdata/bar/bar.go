@@ -1,8 +1,8 @@
-// want package:"pkgHasFlag\\(mayCreateFlag|mayParseFlag\\)"
+// want package:"pkgHasFlag\\(mayCreateFlag\\|mayParseFlag\\)"
 
 package bar
 
-import "flag" // want flag:"pkgHasFlag\\(mayCreateFlag|mayParseFlag\\)"
+import "flag" // want flag:"pkgHasFlag\\(mayCreateFlag\\|mayParseFlag\\)"
 
 var BarStorage string // want BarStorage:"isFlag"
 

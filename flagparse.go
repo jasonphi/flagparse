@@ -106,6 +106,10 @@ type Result struct {
 
 func (r *Result) Kind(v any) (Kind, bool) {
 	switch v := v.(type) {
+	case *types.PkgName:
+		// Even though PkgName implements types.Object we handle it like a package
+		k, ok := r.pkgs[v.Imported()]
+		return k, ok
 	case types.Object: // *types.Val or *types.Func
 		k, ok := r.objs[v]
 		return k, ok
@@ -355,12 +359,12 @@ func flagNameAndKind(pass *analysis.Pass, call *ast.CallExpr) (fn *types.Func, v
 func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind Kind, res *Result) {
 	fn := w.obj
 	var fact funcHasFlag
-	// If true we already have a fact for this func
-	if pass.ImportObjectFact(fn, &fact) {
+	// Retrieve existing kind and compare it with new kind
+	if pass.ImportObjectFact(fn, &fact) && fact.Kind == kind {
 		return
 	}
 
-	fact.Kind = kind
+	fact.Kind |= kind
 	pass.ExportObjectFact(fn, &fact)
 	res.objs[fn] = kind
 	for _, caller := range w.callers {
