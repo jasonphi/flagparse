@@ -19,5 +19,10 @@ func Test(t *testing.T) {
 		"example.com/flagparse/importfoo",
 		"example.com/flagparse/ignoretest",
 		"example.com/flagparse/storage",
+		"example.com/flagparse/cmd/a",
+		"example.com/flagparse/cmd/b",
+		"example.com/flagparse/cmd/c",
+		"example.com/flagparse/cmd/d",
+		"example.com/flagparse/cmd/e",
 	)
 }

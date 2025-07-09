@@ -398,9 +398,12 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind 
 
 func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 	va := w.obj
-	var fact isFlag
+	var (
+		flagFact isFlag
+		funcFact funcHasFlag
+	)
 	// If true we already have a fact for this var
-	if pass.ImportObjectFact(va, &fact) {
+	if pass.ImportObjectFact(va, &flagFact) || pass.ImportObjectFact(va, &funcFact) {
 		return
 	}
 
@@ -409,8 +412,13 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 		// Unconditionally add a fact to the variable but don't update the package
 		// fact, considering the function initializing the flag may not be
 		// called during package init. Let the function call update the package fact.
-		pass.ExportObjectFact(va, &fact)
+		pass.ExportObjectFact(va, &flagFact)
 	case w.expr != nil: // The variable was initialized to something
+		// If this is a not-called function literal then we'd have to track the variable
+		// usage at runtime to accurately determine if it's called "as" a flag function.
+		// The best we can probably do is mark it as a "maybe" flag function
+		_, isFuncLiteral := w.expr.(*ast.FuncLit)
+
 		ast.Inspect(w.expr, func(n ast.Node) bool {
 			// Determine if the expression is a call expression
 			call, ok := n.(*ast.CallExpr)
@@ -423,9 +431,20 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 				return true
 			}
 
+			// If the top-level expression is a function literal then it acts more like a
+			// flag function than a flag variable.
+			if isFuncLiteral {
+				pred := func() bool { return false }
+				funcFact.Kind = handlePackageMaybeKind(pred, funcFact.Kind, kind, KindMayCreateFlag, KindCreatesFlag)
+				funcFact.Kind = handlePackageMaybeKind(pred, funcFact.Kind, kind, KindMayParseFlag, KindParsesFlag)
+				pass.ExportObjectFact(va, &funcFact)
+				res.objs[va] = kind
+				return true
+			}
+
 			// This initializing expression is a flag func of some kind and this is a top-level call
 			// so the var and package need new facts
-			pass.ExportObjectFact(va, &fact)
+			pass.ExportObjectFact(va, &flagFact)
 
 			var (
 				pfact pkgHasFlag
