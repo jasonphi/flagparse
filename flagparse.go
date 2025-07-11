@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
+	"golang.org/x/tools/go/ast/inspector"
 	"golang.org/x/tools/go/types/typeutil"
 )
 
@@ -313,6 +314,7 @@ func find(pass *analysis.Pass, res *Result) error {
 func flagNameAndKind(pass *analysis.Pass, call *ast.CallExpr) (fn *types.Func, va *types.Var, kind Kind) {
 	fn, _ = typeutil.Callee(pass.TypesInfo, call).(*types.Func)
 	if fn == nil {
+		// TODO: here would be where we'd capture calls to named flag variable functions
 		return
 	}
 
@@ -378,8 +380,14 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind 
 	pass.ImportPackageFact(pkg, &pfact)
 
 	pred := func() bool {
+		if w.fdecl.Recv != nil {
+			return false
+		}
 		callerName := w.fdecl.Name.Name
-		return w.fdecl.Recv == nil && (callerName == "main" || callerName == "init")
+		if callerName == "init" {
+			return true
+		}
+		return pkg.Name() == "main" && callerName == "main"
 	}
 
 	// Even if calling this method causes some flag related action to occur, we haven't confirmed
@@ -607,4 +615,40 @@ func match(info *types.Info, arg ast.Expr, param *types.Var) bool {
 	return ok && info.ObjectOf(id) == param
 }
 
-func check(pass *analysis.Pass) {}
+func check(pass *analysis.Pass) {
+	// We only have interesting diagnostics about main packages
+	if pass.Pkg.Name() != "main" {
+		return
+	}
+
+	var pfact pkgHasFlag
+	if !pass.ImportPackageFact(pass.Pkg, &pfact) {
+		return
+	}
+
+	ins := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	nodeFilter := []ast.Node{
+		(*ast.FuncDecl)(nil),
+	}
+
+	ins.Preorder(nodeFilter, func(n ast.Node) {
+		decl, ok := n.(*ast.FuncDecl)
+		if !ok || decl.Name.Name != "main" {
+			return
+		}
+
+		fn, ok := pass.TypesInfo.Defs[decl.Name].(*types.Func)
+		if !ok {
+			return
+		}
+
+		k := pfact.Kind
+
+		switch {
+		case k.Has(KindCreatesFlag) && !k.Has(KindParsesFlag):
+			pass.Reportf(n.Pos(), "%s creates flags but doesn't call flag.Parse()", fn.Name())
+		case k.Has(KindParsesFlag) && !k.Has(KindCreatesFlag):
+			pass.Reportf(n.Pos(), "%s calls flag.Parse() but doesn't create flags", fn.Name())
+		}
+	})
+}
