@@ -25,5 +25,6 @@ func Test(t *testing.T) {
 		"example.com/flagparse/cmd/d",
 		"example.com/flagparse/cmd/e",
 		"example.com/flagparse/cmd/f",
+		"example.com/flagparse/cmd/g",
 	)
 }

@@ -1,10 +1,13 @@
 package flagparse
 
 import (
+	"cmp"
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
 	"reflect"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -54,6 +57,9 @@ func (k Kind) String() string {
 	if k.Has(KindParsesFlag) {
 		s = append(s, "parsesFlag")
 	}
+	if k.Has(KindRootFunc) {
+		s = append(s, "rootFunc")
+	}
 	return strings.Join(s, "|")
 }
 
@@ -63,11 +69,15 @@ const (
 	KindMayCreateFlag                        // Package has one or more functions that create flags
 	KindParsesFlag                           // Function or package parses flags
 	KindCreatesFlag                          // Function or package creates flags
+	KindRootFunc                             // Func is a root function that creates flags
 )
 
 // => *types.Package p has one or more flags, either directly as variables or
 // indirectly via a function call
-type pkgHasFlag struct{ Kind Kind }
+type pkgHasFlag struct {
+	Kind  Kind
+	Roots []ast.Node
+}
 
 func (*pkgHasFlag) AFact() {}
 
@@ -79,7 +89,10 @@ func (p *pkgHasFlag) String() string {
 	return s.String()
 }
 
-type funcHasFlag struct{ Kind Kind } // => *types.Func f defines one or more flags
+type funcHasFlag struct { // => *types.Func f defines one or more flags
+	Kind  Kind
+	Roots []ast.Node
+}
 
 func (*funcHasFlag) AFact() {}
 
@@ -154,51 +167,52 @@ func (i *importWrapper) flagWrapper()      {}
 type flagCaller struct {
 	w    *funcWrapper
 	call *ast.CallExpr
+	fn   *types.Func
 }
 
 var isKindFunc = map[string]Kind{
-	"flag.Parse":                  KindParsesFlag,
-	"flag.Bool":                   KindCreatesFlag,
-	"flag.BoolFunc":               KindCreatesFlag,
-	"flag.BoolVar":                KindCreatesFlag,
-	"flag.Duration":               KindCreatesFlag,
-	"flag.DurationVar":            KindCreatesFlag,
-	"flag.Float64":                KindCreatesFlag,
-	"flag.Float64Var":             KindCreatesFlag,
-	"flag.Func":                   KindCreatesFlag,
-	"flag.Int":                    KindCreatesFlag,
-	"flag.IntVar":                 KindCreatesFlag,
-	"flag.Int64":                  KindCreatesFlag,
-	"flag.Int64Var":               KindCreatesFlag,
-	"flag.String":                 KindCreatesFlag,
-	"flag.StringVar":              KindCreatesFlag,
-	"flag.TextVar":                KindCreatesFlag,
-	"flag.Uint":                   KindCreatesFlag,
-	"flag.UintVar":                KindCreatesFlag,
-	"flag.Uint64":                 KindCreatesFlag,
-	"flag.Uint64Var":              KindCreatesFlag,
-	"flag.Var":                    KindCreatesFlag,
-	"(*flag.FlagSet).Parse":       KindParsesFlag,
-	"(*flag.FlagSet).Bool":        KindCreatesFlag,
-	"(*flag.FlagSet).BoolFunc":    KindCreatesFlag,
-	"(*flag.FlagSet).BoolVar":     KindCreatesFlag,
-	"(*flag.FlagSet).Duration":    KindCreatesFlag,
-	"(*flag.FlagSet).DurationVar": KindCreatesFlag,
-	"(*flag.FlagSet).Float64":     KindCreatesFlag,
-	"(*flag.FlagSet).Float64Var":  KindCreatesFlag,
-	"(*flag.FlagSet).Func":        KindCreatesFlag,
-	"(*flag.FlagSet).Int":         KindCreatesFlag,
-	"(*flag.FlagSet).IntVar":      KindCreatesFlag,
-	"(*flag.FlagSet).Int64":       KindCreatesFlag,
-	"(*flag.FlagSet).Int64Var":    KindCreatesFlag,
-	"(*flag.FlagSet).String":      KindCreatesFlag,
-	"(*flag.FlagSet).StringVar":   KindCreatesFlag,
-	"(*flag.FlagSet).TextVar":     KindCreatesFlag,
-	"(*flag.FlagSet).Uint":        KindCreatesFlag,
-	"(*flag.FlagSet).UintVar":     KindCreatesFlag,
-	"(*flag.FlagSet).Uint64":      KindCreatesFlag,
-	"(*flag.FlagSet).Uint64Var":   KindCreatesFlag,
-	"(*flag.FlagSet).Var":         KindCreatesFlag,
+	"flag.Parse":                  KindParsesFlag | KindRootFunc,
+	"flag.Bool":                   KindCreatesFlag | KindRootFunc,
+	"flag.BoolFunc":               KindCreatesFlag | KindRootFunc,
+	"flag.BoolVar":                KindCreatesFlag | KindRootFunc,
+	"flag.Duration":               KindCreatesFlag | KindRootFunc,
+	"flag.DurationVar":            KindCreatesFlag | KindRootFunc,
+	"flag.Float64":                KindCreatesFlag | KindRootFunc,
+	"flag.Float64Var":             KindCreatesFlag | KindRootFunc,
+	"flag.Func":                   KindCreatesFlag | KindRootFunc,
+	"flag.Int":                    KindCreatesFlag | KindRootFunc,
+	"flag.IntVar":                 KindCreatesFlag | KindRootFunc,
+	"flag.Int64":                  KindCreatesFlag | KindRootFunc,
+	"flag.Int64Var":               KindCreatesFlag | KindRootFunc,
+	"flag.String":                 KindCreatesFlag | KindRootFunc,
+	"flag.StringVar":              KindCreatesFlag | KindRootFunc,
+	"flag.TextVar":                KindCreatesFlag | KindRootFunc,
+	"flag.Uint":                   KindCreatesFlag | KindRootFunc,
+	"flag.UintVar":                KindCreatesFlag | KindRootFunc,
+	"flag.Uint64":                 KindCreatesFlag | KindRootFunc,
+	"flag.Uint64Var":              KindCreatesFlag | KindRootFunc,
+	"flag.Var":                    KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Parse":       KindParsesFlag | KindRootFunc,
+	"(*flag.FlagSet).Bool":        KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).BoolFunc":    KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).BoolVar":     KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Duration":    KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).DurationVar": KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Float64":     KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Float64Var":  KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Func":        KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int":         KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).IntVar":      KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int64":       KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int64Var":    KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).String":      KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).StringVar":   KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).TextVar":     KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint":        KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).UintVar":     KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint64":      KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint64Var":   KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Var":         KindCreatesFlag | KindRootFunc,
 }
 
 // Functions in this map have a pointer value as their first argument which acts as the
@@ -282,7 +296,7 @@ func find(pass *analysis.Pass, res *Result) error {
 				if wrap, ok := byObj[va].(*varWrapper); ok {
 					wrap.refs = append(wrap.refs, fn)
 				}
-				checkFlagFwd(pass, w, call, kind, res)
+				checkFlagFwd(pass, w, call, fn, kind, res)
 				return true
 			}
 
@@ -291,7 +305,7 @@ func find(pass *analysis.Pass, res *Result) error {
 			// Remember this call for later checking.
 			if fn != nil && fn.Pkg() == pass.Pkg && byObj[fn] != nil {
 				callee := byObj[fn].(*funcWrapper)
-				callee.callers = append(callee.callers, flagCaller{w: w, call: call})
+				callee.callers = append(callee.callers, flagCaller{w: w, call: call, fn: fn})
 			}
 
 			return true
@@ -358,19 +372,33 @@ func flagNameAndKind(pass *analysis.Pass, call *ast.CallExpr) (fn *types.Func, v
 	return
 }
 
-func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind Kind, res *Result) {
+func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, callFn *types.Func, kind Kind, res *Result) {
 	fn := w.obj
-	var fact funcHasFlag
-	// Retrieve existing kind and compare it with new kind
-	if pass.ImportObjectFact(fn, &fact) && (fact.Kind|kind == fact.Kind) {
-		return
-	}
 
-	fact.Kind |= kind
+	var fact, callFact funcHasFlag
+	pass.ImportObjectFact(fn, &fact)
+	pass.ImportObjectFact(callFn, &callFact)
+
+	fact.Kind |= kind.Clear(KindRootFunc)
+	fact.Roots = handleFactRoots(
+		func() bool {
+			// Ignore roots from the standard library so roots terminate at the top-level functions
+			return callFn.Pkg().Path() != "flag"
+		},
+		fact.Roots,
+		callFact.Roots...,
+	)
+	fact.Roots = handleFactRoots(
+		func() bool {
+			return kind.Has(KindRootFunc) && call != nil
+		},
+		fact.Roots,
+		call,
+	)
 	pass.ExportObjectFact(fn, &fact)
 	res.objs[fn] = kind
 	for _, caller := range w.callers {
-		checkFlagFwd(pass, caller.w, caller.call, kind, res)
+		checkFlagFwd(pass, caller.w, caller.call, caller.fn, kind, res)
 	}
 
 	var (
@@ -379,7 +407,7 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind 
 	)
 	pass.ImportPackageFact(pkg, &pfact)
 
-	pred := func() bool {
+	pkgPred := func() bool {
 		if w.fdecl.Recv != nil {
 			return false
 		}
@@ -394,10 +422,24 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, kind 
 	// this function has been called in the application. If the calling function is
 	// "init" or "main" then accept the kind as-is, otherwise convert it to a "may" kind until
 	// we handle the function directly from the main package.
-	pfact.Kind = handlePackageMaybeKind(pred, pfact.Kind, kind, KindMayCreateFlag, KindCreatesFlag)
-	pfact.Kind = handlePackageMaybeKind(pred, pfact.Kind, kind, KindMayParseFlag, KindParsesFlag)
+	pfact.Kind = handlePackageMaybeKind(pkgPred, pfact.Kind, kind, KindMayCreateFlag, KindCreatesFlag)
+	pfact.Kind = handlePackageMaybeKind(pkgPred, pfact.Kind, kind, KindMayParseFlag, KindParsesFlag)
 
 	if pfact.Kind != KindNone {
+		pfact.Roots = handleFactRoots(
+			func() bool {
+				return pkgPred() && call != nil
+			},
+			pfact.Roots,
+			fact.Roots...,
+		)
+		pfact.Roots = handleFactRoots(
+			func() bool {
+				return pkgPred() && kind.Has(KindRootFunc) && call != nil
+			},
+			pfact.Roots,
+			call,
+		)
 		pass.ExportPackageFact(&pfact)
 	}
 
@@ -445,6 +487,10 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 				pred := func() bool { return false }
 				funcFact.Kind = handlePackageMaybeKind(pred, funcFact.Kind, kind, KindMayCreateFlag, KindCreatesFlag)
 				funcFact.Kind = handlePackageMaybeKind(pred, funcFact.Kind, kind, KindMayParseFlag, KindParsesFlag)
+
+				pred = func() bool { return kind.Has(KindRootFunc) && call != nil }
+				funcFact.Roots = handleFactRoots(pred, funcFact.Roots, call)
+
 				pass.ExportObjectFact(va, &funcFact)
 				res.objs[va] = kind
 				return true
@@ -466,6 +512,8 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 			pfact.Kind = handlePackageMaybeKind(pred, pfact.Kind, kind, KindMayParseFlag, KindParsesFlag)
 
 			if pfact.Kind != KindNone {
+				pred = func() bool { return kind.Has(KindRootFunc) && call != nil }
+				pfact.Roots = handleFactRoots(pred, pfact.Roots, call)
 				pass.ExportPackageFact(&pfact)
 			}
 
@@ -476,6 +524,7 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 	}
 }
 
+// Note: this function intentionally disregards the root flag bit
 func handlePackageMaybeKind(pred func() bool, pkgKind, otherKind, mayBit, alwBit Kind) Kind {
 	// if the current package already has the "always" bit set or the other kind doesn't then accept as-is
 	if pkgKind.Has(alwBit) || !otherKind.Has(alwBit) {
@@ -488,6 +537,22 @@ func handlePackageMaybeKind(pred func() bool, pkgKind, otherKind, mayBit, alwBit
 	}
 
 	return pkgKind | mayBit
+}
+
+func handleFactRoots(pred func() bool, roots []ast.Node, nodes ...ast.Node) []ast.Node {
+	if !pred() {
+		return roots
+	}
+	roots = append(roots, nodes...)
+	roots = slices.DeleteFunc(roots, func(node ast.Node) bool {
+		return node == nil
+	})
+	slices.SortFunc(roots, func(a, b ast.Node) int {
+		return cmp.Compare(a.Pos(), b.Pos())
+	})
+	return slices.CompactFunc(roots, func(a ast.Node, b ast.Node) bool {
+		return a.Pos() == b.Pos()
+	})
 }
 
 func maybeFlagWrapper(info *types.Info, decl ast.Decl) (ret []flagWrapper) {
@@ -579,40 +644,42 @@ func checkImport(pass *analysis.Pass, w *importWrapper, res *Result) {
 	pass.ImportPackageFact(currPkg, &currFact)
 	pass.ImportPackageFact(importPkg, &importFact)
 
-	if importFact.Kind != KindNone {
-		pass.ExportObjectFact(w.obj, &importFact)
+	if importFact.Kind == KindNone {
+		return
 	}
 
+	pass.ExportObjectFact(w.obj, &importFact)
+
+	kind := currFact.Kind
+
 	// If any imports have top-level flag initialization then that transitively applies to us
-	currFact.Kind = handlePackageMaybeKind(
+	kind = handlePackageMaybeKind(
 		func() bool {
 			return importFact.Kind.Has(KindCreatesFlag)
 		},
-		currFact.Kind,
+		kind,
 		importFact.Kind,
 		KindMayCreateFlag,
 		KindCreatesFlag,
 	)
-	currFact.Kind = handlePackageMaybeKind(
+	kind = handlePackageMaybeKind(
 		func() bool {
 			return importFact.Kind.Has(KindParsesFlag)
 		},
-		currFact.Kind,
+		kind,
 		importFact.Kind,
 		KindMayParseFlag,
 		KindParsesFlag,
 	)
 
-	if currFact.Kind != KindNone {
+	if currFact.Kind != kind || len(importFact.Roots) > 0 {
+		pred := func() bool { return true }
+		currFact.Kind = kind
+		currFact.Roots = handleFactRoots(pred, currFact.Roots, importFact.Roots...)
 		pass.ExportPackageFact(&currFact)
 	}
 
 	res.pkgs[currPkg] = currFact.Kind
-}
-
-func match(info *types.Info, arg ast.Expr, param *types.Var) bool {
-	id, ok := arg.(*ast.Ident)
-	return ok && info.ObjectOf(id) == param
 }
 
 func check(pass *analysis.Pass) {
@@ -646,9 +713,43 @@ func check(pass *analysis.Pass) {
 
 		switch {
 		case k.Has(KindCreatesFlag) && !k.Has(KindParsesFlag):
-			pass.Reportf(n.Pos(), "%s creates flags but doesn't call flag.Parse()", fn.Name())
+			var (
+				related []analysis.RelatedInformation
+				extra   strings.Builder
+			)
+			extra.WriteString("\n")
+			for _, node := range pfact.Roots {
+				related = append(related, analysis.RelatedInformation{
+					Pos:     node.Pos(),
+					End:     node.End(),
+					Message: "flag created",
+				})
+				extra.WriteString(fmt.Sprintf("\t%s: flag created\n", pass.Fset.Position(node.Pos()).String()))
+			}
+			pass.Report(analysis.Diagnostic{
+				Pos:     n.Pos(),
+				Message: fmt.Sprintf("%s creates flags but doesn't call flag.Parse()%s", fn.Name(), extra.String()),
+				Related: related,
+			})
 		case k.Has(KindParsesFlag) && !k.Has(KindCreatesFlag):
-			pass.Reportf(n.Pos(), "%s calls flag.Parse() but doesn't create flags", fn.Name())
+			var (
+				related []analysis.RelatedInformation
+				extra   strings.Builder
+			)
+			extra.WriteString("\n")
+			for _, node := range pfact.Roots {
+				related = append(related, analysis.RelatedInformation{
+					Pos:     node.Pos(),
+					End:     node.End(),
+					Message: "parse called",
+				})
+				extra.WriteString(fmt.Sprintf("\t%s: parse called\n", pass.Fset.Position(node.Pos()).String()))
+			}
+			pass.Report(analysis.Diagnostic{
+				Pos:     n.Pos(),
+				Message: fmt.Sprintf("%s calls flag.Parse() but doesn't create flags%s", fn.Name(), extra.String()),
+				Related: related,
+			})
 		}
 	})
 }

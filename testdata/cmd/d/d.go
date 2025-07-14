@@ -8,4 +8,4 @@ import "flag" // want flag:"pkgHasFlag\\(mayCreateFlag\\|mayParseFlag\\)"
 
 var f = flag.String("f", "", "f flag") // want f:"isFlag"
 
-func main() {} // want "main creates flags but doesn't call flag.Parse\\(\\)"
+func main() {} // want "main creates flags but doesn't call flag\\.Parse\\(\\)"
