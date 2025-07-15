@@ -171,51 +171,338 @@ type flagCaller struct {
 }
 
 var isKindFunc = map[string]Kind{
-	"flag.Parse":                  KindParsesFlag | KindRootFunc,
-	"flag.Bool":                   KindCreatesFlag | KindRootFunc,
-	"flag.BoolFunc":               KindCreatesFlag | KindRootFunc,
-	"flag.BoolVar":                KindCreatesFlag | KindRootFunc,
-	"flag.Duration":               KindCreatesFlag | KindRootFunc,
-	"flag.DurationVar":            KindCreatesFlag | KindRootFunc,
-	"flag.Float64":                KindCreatesFlag | KindRootFunc,
-	"flag.Float64Var":             KindCreatesFlag | KindRootFunc,
-	"flag.Func":                   KindCreatesFlag | KindRootFunc,
-	"flag.Int":                    KindCreatesFlag | KindRootFunc,
-	"flag.IntVar":                 KindCreatesFlag | KindRootFunc,
-	"flag.Int64":                  KindCreatesFlag | KindRootFunc,
-	"flag.Int64Var":               KindCreatesFlag | KindRootFunc,
-	"flag.String":                 KindCreatesFlag | KindRootFunc,
-	"flag.StringVar":              KindCreatesFlag | KindRootFunc,
-	"flag.TextVar":                KindCreatesFlag | KindRootFunc,
-	"flag.Uint":                   KindCreatesFlag | KindRootFunc,
-	"flag.UintVar":                KindCreatesFlag | KindRootFunc,
-	"flag.Uint64":                 KindCreatesFlag | KindRootFunc,
-	"flag.Uint64Var":              KindCreatesFlag | KindRootFunc,
-	"flag.Var":                    KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Parse":       KindParsesFlag | KindRootFunc,
-	"(*flag.FlagSet).Bool":        KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).BoolFunc":    KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).BoolVar":     KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Duration":    KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).DurationVar": KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Float64":     KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Float64Var":  KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Func":        KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Int":         KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).IntVar":      KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Int64":       KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Int64Var":    KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).String":      KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).StringVar":   KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).TextVar":     KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Uint":        KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).UintVar":     KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Uint64":      KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Uint64Var":   KindCreatesFlag | KindRootFunc,
-	"(*flag.FlagSet).Var":         KindCreatesFlag | KindRootFunc,
+	"flag.Parse":                                           KindParsesFlag | KindRootFunc,
+	"flag.Bool":                                            KindCreatesFlag | KindRootFunc,
+	"flag.BoolFunc":                                        KindCreatesFlag | KindRootFunc,
+	"flag.BoolVar":                                         KindCreatesFlag | KindRootFunc,
+	"flag.Duration":                                        KindCreatesFlag | KindRootFunc,
+	"flag.DurationVar":                                     KindCreatesFlag | KindRootFunc,
+	"flag.Float64":                                         KindCreatesFlag | KindRootFunc,
+	"flag.Float64Var":                                      KindCreatesFlag | KindRootFunc,
+	"flag.Func":                                            KindCreatesFlag | KindRootFunc,
+	"flag.Int":                                             KindCreatesFlag | KindRootFunc,
+	"flag.IntVar":                                          KindCreatesFlag | KindRootFunc,
+	"flag.Int64":                                           KindCreatesFlag | KindRootFunc,
+	"flag.Int64Var":                                        KindCreatesFlag | KindRootFunc,
+	"flag.String":                                          KindCreatesFlag | KindRootFunc,
+	"flag.StringVar":                                       KindCreatesFlag | KindRootFunc,
+	"flag.TextVar":                                         KindCreatesFlag | KindRootFunc,
+	"flag.Uint":                                            KindCreatesFlag | KindRootFunc,
+	"flag.UintVar":                                         KindCreatesFlag | KindRootFunc,
+	"flag.Uint64":                                          KindCreatesFlag | KindRootFunc,
+	"flag.Uint64Var":                                       KindCreatesFlag | KindRootFunc,
+	"flag.Var":                                             KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Parse":                         KindParsesFlag | KindRootFunc,
+	"github.com/spf13/pflag.ParseAll":                      KindParsesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Bool":                          KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolP":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolSlice":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolSliceP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolSliceVar":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolVar":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BoolVarP":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesBase64":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesBase64P":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesBase64Var":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesBase64VarP":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesHex":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesHexP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesHexVar":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.BytesHexVarP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Count":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.CountP":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.CountVar":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.CountVarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Duration":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationSlice":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationSliceP":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationSliceVar":              KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationVar":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.DurationVarP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32P":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32Slice":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32SliceP":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32SliceVar":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32Var":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float32VarP":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64P":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64Slice":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64SliceP":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64SliceVar":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64Var":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Float64VarP":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IP":                            KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPMask":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPMaskP":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPMaskVar":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPMaskVarP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNet":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetP":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetSlice":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetSliceP":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetSliceVar":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetVar":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPNetVarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPP":                           KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPSlice":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPSliceP":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPSliceVar":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPVar":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IPVarP":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int":                           KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int16":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int16P":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int16Var":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int16VarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32P":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32Slice":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32SliceP":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32SliceVar":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32Var":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int32VarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64P":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64Slice":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64SliceP":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64SliceVar":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64Var":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int64VarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int8":                          KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int8P":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int8Var":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Int8VarP":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntP":                          KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntSlice":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntSliceP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntSliceVar":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntVar":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.IntVarP":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.String":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringArray":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringArrayP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringArrayVar":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringArrayVarP":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringP":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringSlice":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringSliceP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringSliceVar":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToInt":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToInt64":                 KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToInt64P":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToInt64Var":              KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToInt64VarP":             KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToIntP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToIntVar":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToIntVarP":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToString":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToStringP":               KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToStringVar":             KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringToStringVarP":            KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringVar":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.StringVarP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint":                          KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint16":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint16P":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint16Var":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint16VarP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32P":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32Slice":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32SliceP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32SliceVar":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32Var":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint32VarP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64P":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64Slice":                   KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64SliceP":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64SliceVar":                KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64Var":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint64VarP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint8":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint8P":                        KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint8Var":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Uint8VarP":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintP":                         KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintSlice":                     KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintSliceP":                    KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintSliceVar":                  KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintVar":                       KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.UintVarP":                      KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.Var":                           KindCreatesFlag | KindRootFunc,
+	"github.com/spf13/pflag.VarP":                          KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Parse":                                KindParsesFlag | KindRootFunc,
+	"(*flag.FlagSet).Bool":                                 KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).BoolFunc":                             KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).BoolVar":                              KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Duration":                             KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).DurationVar":                          KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Float64":                              KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Float64Var":                           KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Func":                                 KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int":                                  KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).IntVar":                               KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int64":                                KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Int64Var":                             KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).String":                               KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).StringVar":                            KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).TextVar":                              KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint":                                 KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).UintVar":                              KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint64":                               KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Uint64Var":                            KindCreatesFlag | KindRootFunc,
+	"(*flag.FlagSet).Var":                                  KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Parse":              KindParsesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).ParseAll":           KindParsesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Bool":               KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolP":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolSlice":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolSliceP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolSliceVar":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolVar":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BoolVarP":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesBase64":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesBase64P":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesBase64Var":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesBase64VarP":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesHex":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesHexP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesHexVar":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).BytesHexVarP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Count":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).CountP":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).CountVar":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).CountVarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Duration":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationSlice":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationSliceP":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationSliceVar":   KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationVar":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).DurationVarP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32P":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32Slice":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32SliceP":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32SliceVar":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32Var":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float32VarP":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64P":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64Slice":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64SliceP":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64SliceVar":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64Var":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Float64VarP":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IP":                 KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPMask":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPMaskP":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPMaskVar":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPMaskVarP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNet":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetP":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetSlice":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetSliceP":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetSliceVar":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetVar":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPNetVarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPP":                KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPSlice":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPSliceP":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPSliceVar":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPVar":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IPVarP":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int":                KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int16":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int16P":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int16Var":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int16VarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32P":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32Slice":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32SliceP":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32SliceVar":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32Var":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int32VarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64P":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64Slice":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64SliceP":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64SliceVar":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64Var":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int64VarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int8":               KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int8P":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int8Var":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Int8VarP":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntP":               KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntSlice":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntSliceP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntSliceVar":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntVar":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).IntVarP":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).String":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringArray":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringArrayP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringArrayVar":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringArrayVarP":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringP":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringSlice":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringSliceP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringSliceVar":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToInt":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToInt64":      KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToInt64P":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToInt64Var":   KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToInt64VarP":  KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToIntP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToIntVar":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToIntVarP":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToString":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToStringP":    KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToStringVar":  KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringToStringVarP": KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringVar":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).StringVarP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint":               KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint16":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint16P":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint16Var":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint16VarP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32P":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32Slice":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32SliceP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32SliceVar":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32Var":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint32VarP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64P":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64Slice":        KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64SliceP":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64SliceVar":     KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64Var":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint64VarP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint8":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint8P":             KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint8Var":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Uint8VarP":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintP":              KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintSlice":          KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintSliceP":         KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintSliceVar":       KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintVar":            KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).UintVarP":           KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).Var":                KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).VarP":               KindCreatesFlag | KindRootFunc,
+	"(*github.com/spf13/pflag.FlagSet).VarPF":              KindCreatesFlag | KindRootFunc,
 }
 
-// Functions in this map have a pointer value as their first argument which acts as the
+// Functions in this map have a pointer value as their first argument, which acts as the
 // storage for a flag variable.
 var hasVarRef = map[string]struct{}{
 	"flag.BoolVar":                {},
@@ -237,6 +524,18 @@ var hasVarRef = map[string]struct{}{
 	"(*flag.FlagSet).UintVar":     {},
 	"(*flag.FlagSet).Uint64Var":   {},
 	"(*flag.FlagSet).Var":         {},
+}
+
+// Ignorelist of packages that do weird things with flags but are otherwise innocuous
+var ignoredPkgs = map[string]struct{}{
+	"k8s.io/klog/v2":    {},
+	"net/http/httptest": {},
+}
+
+// Packages that act as root packages to terminate roots
+var rootPkgs = map[string]struct{}{
+	"flag":                   {},
+	"github.com/spf13/pflag": {},
 }
 
 func run(pass *analysis.Pass) (any, error) {
@@ -303,7 +602,7 @@ func find(pass *analysis.Pass, res *Result) error {
 			// If the call is to another function in this package,
 			// maybe we will find out it is flag-like later.
 			// Remember this call for later checking.
-			if fn != nil && fn.Pkg() == pass.Pkg && byObj[fn] != nil {
+			if fn != nil && fn.Pkg() == pass.Pkg && byObj[fn] != nil && w.obj != fn {
 				callee := byObj[fn].(*funcWrapper)
 				callee.callers = append(callee.callers, flagCaller{w: w, call: call, fn: fn})
 			}
@@ -382,8 +681,9 @@ func checkFlagFwd(pass *analysis.Pass, w *funcWrapper, call *ast.CallExpr, callF
 	fact.Kind |= kind.Clear(KindRootFunc)
 	fact.Roots = handleFactRoots(
 		func() bool {
-			// Ignore roots from the standard library so roots terminate at the top-level functions
-			return callFn.Pkg().Path() != "flag"
+			_, root := rootPkgs[callFn.Pkg().Path()]
+			// Ignore roots from the standard library, and pflag so roots terminate at the top-level functions
+			return !root
 		},
 		fact.Roots,
 		callFact.Roots...,
@@ -452,8 +752,9 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 		flagFact isFlag
 		funcFact funcHasFlag
 	)
-	// If true we already have a fact for this var
-	if pass.ImportObjectFact(va, &flagFact) || pass.ImportObjectFact(va, &funcFact) {
+
+	if pass.ImportObjectFact(va, &flagFact) && pass.ImportObjectFact(va, &funcFact) {
+		// If true we already have a fact for this var
 		return
 	}
 
@@ -476,7 +777,7 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 				return true
 			}
 
-			_, _, kind := flagNameAndKind(pass, call)
+			callFn, _, kind := flagNameAndKind(pass, call)
 			if kind == KindNone {
 				return true
 			}
@@ -501,10 +802,22 @@ func checkVar(pass *analysis.Pass, w *varWrapper, res *Result) {
 			pass.ExportObjectFact(va, &flagFact)
 
 			var (
-				pfact pkgHasFlag
-				pkg   = va.Pkg()
+				pfact    pkgHasFlag
+				callFact funcHasFlag
+				pkg      = va.Pkg()
 			)
 			pass.ImportPackageFact(pkg, &pfact)
+			pass.ImportObjectFact(callFn, &callFact)
+
+			pfact.Roots = handleFactRoots(
+				func() bool {
+					_, root := rootPkgs[callFn.Pkg().Path()]
+					// Ignore roots from the standard library, and pflag so roots terminate at the top-level functions
+					return !root
+				},
+				pfact.Roots,
+				callFact.Roots...,
+			)
 
 			// We know this var is top-level so the predicate always returns true
 			pred := func() bool { return true }
@@ -648,11 +961,16 @@ func checkImport(pass *analysis.Pass, w *importWrapper, res *Result) {
 		return
 	}
 
+	// Don't transitively apply package roots and kind for ignored packages
+	if _, ok := ignoredPkgs[importPkg.Path()]; ok {
+		return
+	}
+
 	pass.ExportObjectFact(w.obj, &importFact)
 
 	kind := currFact.Kind
 
-	// If any imports have top-level flag initialization then that transitively applies to us
+	// If any imports have top-level flag initialization, then that transitively applies to us
 	kind = handlePackageMaybeKind(
 		func() bool {
 			return importFact.Kind.Has(KindCreatesFlag)
